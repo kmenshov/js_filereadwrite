@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>JS File Read/Write</title>
+  <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+  <![endif]-->
+</head>
+
+<body>
+  <input type="file" id="fileinput" />
+  
+  <script type="text/javascript">
+    function readSingleFile(evt) {
+      //Retrieve the first (and only!) File from the FileList object
+      var f = evt.target.files[0];
+
+      if (f) {
+        var r = new FileReader();
+        r.onload = function(e) {
+  	      var contents = e.target.result; //TODO: limit to the first N characters here.
+          reportFile('loaded: '+f.name, contents);
+          
+          saveTextFile();
+        }
+        r.onerror = function(e) {
+          alert("File could not be read! Code " + e.target.error.code);
+        };
+        r.readAsText(f);
+      } else {
+        alert("Failed to load file");
+      }
+    }
+    
+    function reportFile(header, content) {
+      var reportDiv = document.createElement('div');
+      var reportInnerContent = '<h1>'+header+'</h1>';
+      reportInnerContent += content.replace(/\n/g, '<br>');
+      reportDiv.innerHTML = reportInnerContent;
+      document.body.appendChild(reportDiv);
+    }
+    
+    function saveTextFile() {
+      var contents = 'Writing new file with the...\r\n'+(new Date())+'\r\n...in the middle of it.';
+      var contentsBlob = new Blob([contents], { type: 'text/plain' });
+      
+      var downloadLink = document.createElement('a');
+      downloadLink.download = 'NewFile.txt';
+      downloadLink.innerHTML = 'Download File';
+      downloadLink.href = window.URL.createObjectURL(contentsBlob);
+      downloadLink.onclick = function (e) {document.body.removeChild(e.target);};
+      downloadLink.style.display = 'none';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      reportFile('saved: ', contents);
+    }
+
+    document.getElementById('fileinput').addEventListener('change', readSingleFile, false);
+  </script>
+</body>
+</html>
